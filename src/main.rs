@@ -23,7 +23,8 @@ async fn handle(pi: Person) {
         if lenp == 1 {
             0
         } else {
-            ki = if ki >= lenp { 0 } else { ki + 1 };
+            ki += 1;
+            ki = if ki >= lenp { 0 } else { ki };
             return ki;
         }
     };
@@ -40,16 +41,15 @@ async fn handle(pi: Person) {
             let (mut ri, mut wi) = inbound.split();
             let (mut ro, mut wo) = outbound.split();
             let client_to_server = async {
-                io::copy(&mut ri, &mut wo).await?;
-                wo.shutdown().await
+                if let Err(_) = io::copy(&mut ri, &mut wo).await {}
+                if let Err(_) = wo.shutdown().await {}
             };
 
             let server_to_client = async {
-                io::copy(&mut ro, &mut wi).await?;
-                wi.shutdown().await
+                if let Err(_) = io::copy(&mut ro, &mut wi).await {}
+                if let Err(_) = wi.shutdown().await {};
             };
-
-            tokio::try_join!(client_to_server, server_to_client).unwrap();
+            tokio::join!(client_to_server, server_to_client);
         });
     }
 }
