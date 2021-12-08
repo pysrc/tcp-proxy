@@ -55,7 +55,14 @@ async fn handle(pi: Person) {
 }
 
 fn main() {
-    let f = File::open("config.json");
+    let mut cfgname = String::new();
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() == 1 {
+        cfgname.push_str("config.json");
+    } else {
+        cfgname.push_str(&args[1]);
+    }
+    let f = File::open(cfgname);
     let cfg = match f {
         Ok(mut file) => {
             let mut config = String::new();
